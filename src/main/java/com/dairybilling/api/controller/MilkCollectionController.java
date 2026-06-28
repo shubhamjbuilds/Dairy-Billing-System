@@ -2,6 +2,8 @@ package com.dairybilling.api.controller;
 
 import com.dairybilling.api.entity.MilkCollection;
 import com.dairybilling.api.service.MilkCollectionService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +19,7 @@ public class MilkCollectionController {
     @PostMapping("/customer/{customerId}")
     public ResponseEntity<MilkCollection> recordCollection(
             @PathVariable Long customerId,
-            @RequestBody MilkCollection request) {
+            @Valid @RequestBody MilkCollection request) {
         
         MilkCollection savedCollection = collectionService.recordCollection(request, customerId);
         return ResponseEntity.ok(savedCollection);

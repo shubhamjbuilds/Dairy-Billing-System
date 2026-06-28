@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 @Entity
 @Table(name = "milk_collection")
 @Data
@@ -24,9 +27,13 @@ public class MilkCollection {
     @Column(nullable = false)
     private String shift; // e.g., "MORNING" or "EVENING"
 
+    @NotNull(message = "Quantity cannot be empty")
+    @Positive(message = "Quantity must be greater than zero")
     @Column(nullable = false)
     private Double quantityInLiters;
     
+    @NotNull(message = "Fat percentage cannot be empty")
+    @Positive(message = "Fat must be greater than zero")
     @Column(nullable = false)
     private Double fatPercentage;
     
