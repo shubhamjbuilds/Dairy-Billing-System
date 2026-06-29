@@ -9,6 +9,7 @@ import com.dairybilling.api.service.OnboardingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/onboarding")
@@ -32,11 +33,15 @@ public class OnboardingController {
 
     // --- 2. APPROVE FROM STAGING ---
 
+ // Branches can be approved by the Parent Company (or Super Admin)
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PARENT_ADMIN')")
     @PostMapping("/branch/{stagingId}/approve")
     public ResponseEntity<Branch> approveBranch(@PathVariable Long stagingId) {
         return ResponseEntity.ok(approvalService.approveBranch(stagingId));
     }
 
+ // Customers can be approved by the local Branch Admin (or anyone above them)
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PARENT_ADMIN', 'BRANCH_ADMIN')")
     @PostMapping("/customer/{stagingId}/approve")
     public ResponseEntity<Customer> approveCustomer(@PathVariable Long stagingId) {
         return ResponseEntity.ok(approvalService.approveCustomer(stagingId));
