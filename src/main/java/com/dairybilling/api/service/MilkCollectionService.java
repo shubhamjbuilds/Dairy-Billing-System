@@ -15,6 +15,7 @@ public class MilkCollectionService {
 
     private final MilkCollectionRepository collectionRepo;
     private final CustomerRepository customerRepo;
+    private final SmsService smsService; 
 
     // This could eventually be moved to a database table so admins can change it!
     private static final Double RATE_PER_FAT_UNIT = 7.00;
@@ -49,7 +50,23 @@ public class MilkCollectionService {
             request.setCollectionDate(LocalDate.now());
         }
 
-        // 4. Save to database
-        return collectionRepo.save(request);
+        // 4. Save to database FIRST and store it in a variable
+        MilkCollection savedCollection = collectionRepo.save(request);
+        
+        // 5. Fire the SMS Receipt asynchronously
+        if (customer.getContactNumber() != null && !customer.getContactNumber().isEmpty()) {
+            // Run this in a new thread so the API doesn't force the admin to wait for the SMS to finish sending
+            new Thread(() -> {
+                smsService.sendReceipt(
+                    customer.getContactNumber(),
+                    savedCollection.getQuantityInLiters(), // Using the savedCollection variable
+                    savedCollection.getFatPercentage(),
+                    savedCollection.getTotalPrice()
+                );
+            }).start();
+        }
+
+        // 6. Return the saved record at the VERY END of the method
+        return savedCollection;
     }
 }
